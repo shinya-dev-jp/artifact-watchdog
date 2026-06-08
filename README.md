@@ -1,5 +1,9 @@
 # artifact-watchdog
 
+[![CI](https://github.com/shinya-dev-jp/artifact-watchdog/actions/workflows/ci.yml/badge.svg)](https://github.com/shinya-dev-jp/artifact-watchdog/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
+
 `artifact-watchdog` is a small Python CLI for auditing scheduled jobs by checking the files they were supposed to produce.
 
 It is built around a simple rule: a scheduler timestamp is not proof of success. A job is healthy only when its expected artifacts exist.
@@ -29,6 +33,16 @@ Use it when a scheduled job has a durable output contract:
 
 It is not a replacement for Prometheus, Datadog, or hosted uptime monitoring. It is for simple maintainer workflows where success means: "this file should exist by this time."
 
+## What It Catches
+
+```text
+runner state says: ran at 03:01
+workspace says:    artifacts/2026-06-07/import-summary.json is missing
+verdict:           RUN_ATTEMPTED_ARTIFACT_MISSING
+```
+
+That distinction is useful when a maintainer needs to know whether to trust an automation, rerun it, or investigate the runner itself.
+
 ## Demo
 
 The demo fixture contains four jobs: one healthy, one attempted-without-artifact, one with a matching runner failure log, and one with a schedule drift.
@@ -49,6 +63,8 @@ nightly-import	RUN_ATTEMPTED_ARTIFACT_MISSING	artifact=MISSING
 release-notes	RUNNER_FAIL_LOG_FOUND	artifact=MISSING
 metrics-rollup	TIME_DRIFT_CHECK	artifact=MISSING
 ```
+
+The demo workspace lives in [`examples/demo-workspace`](examples/demo-workspace/README.md).
 
 ## Install
 
@@ -141,6 +157,17 @@ Keep private project names, customer data, internal paths, and secrets out of pu
 PYTHONPATH=src python -m unittest discover -s tests
 ```
 
+The CI workflow also compiles the source files and runs the demo command on Python 3.11 and 3.12.
+
+## Maintainer Notes
+
+- [Roadmap](docs/ROADMAP.md)
+- [Release checklist](docs/RELEASING.md)
+- [Changelog](CHANGELOG.md)
+- [Security policy](SECURITY.md)
+
 ## Status
 
-This is an early public-ready extraction of a general artifact-based monitoring pattern. It is intentionally small: TOML config in, terminal or Markdown report out.
+This is an early public release of a general artifact-based monitoring pattern. It is intentionally small: TOML config in, terminal or Markdown report out.
+
+The next useful improvements are better CI integration, clearer config errors, and a `--fail-on` mode for maintainers who want to gate scheduled workflows on artifact checks.
