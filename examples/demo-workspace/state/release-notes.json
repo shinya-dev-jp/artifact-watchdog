@@ -1,0 +1,6 @@
+{
+  "last_run_at": "2026-06-07T04:01:00+00:00",
+  "next_run_at": "2026-06-08T04:00:00+00:00",
+  "schedule": "FREQ=DAILY;BYHOUR=4;BYMINUTE=0"
+}
+

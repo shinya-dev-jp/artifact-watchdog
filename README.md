@@ -1,0 +1,146 @@
+# artifact-watchdog
+
+`artifact-watchdog` is a small Python CLI for auditing scheduled jobs by checking the files they were supposed to produce.
+
+It is built around a simple rule: a scheduler timestamp is not proof of success. A job is healthy only when its expected artifacts exist.
+
+## The Problem
+
+Many automations have two different truths:
+
+- the runner says the job was due or attempted;
+- the workspace either contains the expected output or it does not.
+
+Those truths can disagree. A cron job, CI workflow, local agent, or release script can advance its state while failing before it writes the JSON, HTML, changelog, package, or report that people actually depend on.
+
+`artifact-watchdog` makes that disagreement explicit.
+
+## Use Cases
+
+Use it when a scheduled job has a durable output contract:
+
+| Scene | Expected artifact | Why a timestamp is not enough |
+|---|---|---|
+| Documentation build | `site/YYYY-MM-DD/index.html` | The workflow can start and fail before publishing docs. |
+| Nightly data import | `artifacts/YYYY-MM-DD/import-summary.json` | An attempted import is not the same as a completed import. |
+| Release note generation | `reports/YYYYMMDD_release-notes.md` | Maintainers need the actual note file before cutting a release. |
+| Agent-maintained reports | `reports/YYYY-MM-DD.md` | An agent may resume a task but fail before writing the report. |
+| Local backups or exports | `exports/YYYY-MM-DD/archive.zip` | Scheduler state does not prove the archive exists. |
+
+It is not a replacement for Prometheus, Datadog, or hosted uptime monitoring. It is for simple maintainer workflows where success means: "this file should exist by this time."
+
+## Demo
+
+The demo fixture contains four jobs: one healthy, one attempted-without-artifact, one with a matching runner failure log, and one with a schedule drift.
+
+```bash
+PYTHONPATH=src python -m artifact_watchdog.cli \
+  --config examples/demo-workspace/watchdog.toml \
+  --workspace examples/demo-workspace \
+  --date 2026-06-07 \
+  --now 2026-06-07T06:00:00+00:00
+```
+
+Expected output:
+
+```text
+docs-build	OK	artifact=FOUND
+nightly-import	RUN_ATTEMPTED_ARTIFACT_MISSING	artifact=MISSING
+release-notes	RUNNER_FAIL_LOG_FOUND	artifact=MISSING
+metrics-rollup	TIME_DRIFT_CHECK	artifact=MISSING
+```
+
+## Install
+
+Requires Python 3.11 or newer.
+
+```bash
+python -m pip install -e .
+```
+
+## Quick Start
+
+```bash
+artifact-watchdog \
+  --config examples/artifact-watchdog.toml \
+  --workspace . \
+  --date 2026-06-07 \
+  --markdown reports/2026-06-07.md
+```
+
+JSON output:
+
+```bash
+artifact-watchdog --config examples/artifact-watchdog.toml --workspace . --json
+```
+
+## Config
+
+Config files use TOML and stay intentionally generic.
+
+```toml
+[watchdog]
+timezone = "UTC"
+grace_minutes = 15
+log_lookback_hours = 24
+
+[[jobs]]
+id = "nightly-import"
+status = "active"
+schedule = "FREQ=DAILY;BYHOUR=3;BYMINUTE=0"
+artifacts = [
+  "artifacts/{date}/import-summary.json",
+  "reports/{date_compact}_nightly-import.md",
+]
+state_file = "state/nightly-import.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Scheduled run failed", "Timed out"]
+```
+
+Supported artifact placeholders:
+
+- `{date}`: target date such as `2026-06-07`
+- `{date_compact}`: target date such as `20260607`
+- `{job_id}`: the configured job id
+
+Supported schedules:
+
+- `daily@03:00`
+- `FREQ=DAILY;BYHOUR=3;BYMINUTE=0`
+
+Optional state files are JSON:
+
+```json
+{
+  "last_run_at": "2026-06-07T03:00:26+00:00",
+  "next_run_at": "2026-06-08T03:00:00+00:00",
+  "schedule": "FREQ=DAILY;BYHOUR=3;BYMINUTE=0"
+}
+```
+
+## Verdicts
+
+| Verdict | Meaning |
+|---|---|
+| `OK` | At least one expected artifact exists. |
+| `TIME_DRIFT_CHECK` | Scheduler state points to a different time than the configured schedule. |
+| `RUNNER_FAIL_LOG_FOUND` | No artifact exists, and a recent matching failure log was found. |
+| `RUN_ATTEMPTED_ARTIFACT_MISSING` | State says the job ran on the target date, but no artifact exists. |
+| `ARTIFACT_MISSING_OR_NOT_DUE` | The configured due time has not passed yet. |
+| `ARTIFACT_MISSING_DUE_PASSED` | The due time has passed with no artifact and no failure evidence. |
+
+## Privacy Model
+
+The tool does not need credentials, network access, or a hosted service. It reads local config, local state JSON, local logs, and local artifact paths.
+
+Keep private project names, customer data, internal paths, and secrets out of published config examples and reports.
+
+## Development
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests
+```
+
+## Status
+
+This is an early public-ready extraction of a general artifact-based monitoring pattern. It is intentionally small: TOML config in, terminal or Markdown report out.

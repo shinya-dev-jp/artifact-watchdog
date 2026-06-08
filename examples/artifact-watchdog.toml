@@ -1,0 +1,26 @@
+[watchdog]
+timezone = "UTC"
+grace_minutes = 15
+log_lookback_hours = 24
+
+[[jobs]]
+id = "nightly-import"
+status = "active"
+schedule = "FREQ=DAILY;BYHOUR=3;BYMINUTE=0"
+artifacts = [
+  "artifacts/{date}/import-summary.json",
+  "reports/{date_compact}_nightly-import.md",
+]
+state_file = "state/nightly-import.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Scheduled run failed", "Timed out"]
+
+[[jobs]]
+id = "docs-build"
+status = "active"
+schedule = "daily@04:30"
+artifacts = ["site/{date}/index.html"]
+state_file = "state/docs-build.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Build failed", "exit code"]
+

@@ -1,0 +1,39 @@
+[watchdog]
+timezone = "UTC"
+grace_minutes = 10
+log_lookback_hours = 24
+
+[[jobs]]
+id = "docs-build"
+status = "active"
+schedule = "daily@02:00"
+artifacts = ["site/{date}/index.html"]
+state_file = "state/docs-build.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Scheduled run failed", "Build failed"]
+
+[[jobs]]
+id = "nightly-import"
+status = "active"
+schedule = "daily@03:00"
+artifacts = ["artifacts/{date}/import-summary.json"]
+state_file = "state/nightly-import.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Scheduled run failed", "Timed out"]
+
+[[jobs]]
+id = "release-notes"
+status = "active"
+schedule = "FREQ=DAILY;BYHOUR=4;BYMINUTE=0"
+artifacts = ["reports/{date_compact}_release-notes.md"]
+state_file = "state/release-notes.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Scheduled run failed", "Timed out"]
+
+[[jobs]]
+id = "metrics-rollup"
+status = "active"
+schedule = "daily@05:00"
+artifacts = ["artifacts/{date}/metrics.csv"]
+state_file = "state/metrics-rollup.json"
+
