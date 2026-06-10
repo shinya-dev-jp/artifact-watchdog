@@ -90,6 +90,31 @@ JSON output:
 artifact-watchdog --config examples/artifact-watchdog.toml --workspace . --json
 ```
 
+Fail a CI step when any job is not `OK`:
+
+```bash
+artifact-watchdog --config examples/artifact-watchdog.toml --workspace . --fail-on any
+```
+
+You can also fail only on specific verdicts:
+
+```bash
+artifact-watchdog \
+  --config examples/artifact-watchdog.toml \
+  --workspace . \
+  --fail-on RUNNER_FAIL_LOG_FOUND,RUN_ATTEMPTED_ARTIFACT_MISSING
+```
+
+## GitHub Actions And Cron
+
+Copy [`examples/github-actions.yml`](examples/github-actions.yml) into `.github/workflows/artifact-watchdog.yml` to run artifact checks on a schedule. The sample installs the CLI from this GitHub repository, writes a Markdown report to the GitHub step summary, and fails the workflow when any configured job is not `OK`.
+
+For a local machine or server cron, adapt [`examples/cron-daily.sh`](examples/cron-daily.sh):
+
+```cron
+30 6 * * * cd /path/to/workspace && ARTIFACT_WATCHDOG_CONFIG=artifact-watchdog.toml ./examples/cron-daily.sh
+```
+
 ## Config
 
 Config files use TOML and stay intentionally generic.
@@ -145,6 +170,16 @@ Optional state files are JSON:
 | `ARTIFACT_MISSING_OR_NOT_DUE` | The configured due time has not passed yet. |
 | `ARTIFACT_MISSING_DUE_PASSED` | The due time has passed with no artifact and no failure evidence. |
 
+## Exit Codes
+
+By default, `artifact-watchdog` exits `0` after reporting verdicts. Use `--fail-on` when a shell, cron wrapper, or CI job should treat selected verdicts as failures.
+
+| Option | Behavior |
+|---|---|
+| `--fail-on any` | Exit `1` if any job is not `OK`. |
+| `--fail-on none` | Always exit `0` after reporting. |
+| `--fail-on RUNNER_FAIL_LOG_FOUND,RUN_ATTEMPTED_ARTIFACT_MISSING` | Exit `1` only when one of the listed verdicts is present. |
+
 ## Privacy Model
 
 The tool does not need credentials, network access, or a hosted service. It reads local config, local state JSON, local logs, and local artifact paths.
@@ -168,6 +203,6 @@ The CI workflow also compiles the source files and runs the demo command on Pyth
 
 ## Status
 
-This is an early public release of a general artifact-based monitoring pattern. It is intentionally small: TOML config in, terminal or Markdown report out.
+This is an early public release of a general artifact-based monitoring pattern. It is intentionally small: TOML config in, terminal, JSON, Markdown report, or CI exit code out.
 
-The next useful improvements are better CI integration, clearer config errors, and a `--fail-on` mode for maintainers who want to gate scheduled workflows on artifact checks.
+The next useful improvements are clearer config errors, Markdown report fixtures, and GitHub step summary polish.

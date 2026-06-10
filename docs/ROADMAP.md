@@ -4,10 +4,9 @@
 
 ## Near Term
 
-- Add a compact example for GitHub Actions artifact checks.
 - Add stricter config validation with clearer error messages.
-- Add a `--fail-on` option for CI use, such as failing when any job is not `OK`.
 - Add Markdown report fixtures to make output changes easier to review.
+- Add GitHub step summary polish for workflows that want both human-readable reports and machine-readable JSON.
 
 ## Possible Later Work
 
@@ -23,4 +22,3 @@
 - Metrics dashboards.
 - Reading secrets or remote service credentials.
 - Replacing CI, cron, Prometheus, Datadog, or similar systems.
-

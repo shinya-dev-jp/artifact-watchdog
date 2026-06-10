@@ -38,3 +38,14 @@ jobs:
             --date 2026-06-07 \
             --now 2026-06-07T06:00:00+00:00
 
+      - name: Verify fail-on exits non-zero for unhealthy demo
+        run: |
+          if PYTHONPATH=src python -m artifact_watchdog.cli \
+            --config examples/demo-workspace/watchdog.toml \
+            --workspace examples/demo-workspace \
+            --date 2026-06-07 \
+            --now 2026-06-07T06:00:00+00:00 \
+            --fail-on any; then
+            echo "expected --fail-on any to exit non-zero for the unhealthy demo fixture"
+            exit 1
+          fi

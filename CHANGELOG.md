@@ -8,6 +8,8 @@ The format is inspired by Keep a Changelog, and this project follows semantic ve
 
 ### Added
 
+- `--fail-on` CLI option for CI and cron wrappers that should fail on selected verdicts.
+- GitHub Actions and cron usage examples.
 - GitHub Actions CI for Python 3.11 and 3.12.
 - Demo workspace covering `OK`, attempted-without-artifact, runner-failure, and time-drift verdicts.
 - Issue templates and pull request checklist.
@@ -23,4 +25,3 @@ The format is inspired by Keep a Changelog, and this project follows semantic ve
 - Optional log scanning.
 - Text, JSON, and Markdown report output.
 - Unit tests for core verdict behavior.
-

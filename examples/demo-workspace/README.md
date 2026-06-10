@@ -19,3 +19,4 @@ PYTHONPATH=src python -m artifact_watchdog.cli \
   --now 2026-06-07T06:00:00+00:00
 ```
 
+To test CI-style failure behavior, add `--fail-on any`. This fixture should exit non-zero because three of the four jobs are intentionally unhealthy.

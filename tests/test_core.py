@@ -60,7 +60,7 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(row.verdict, Verdict.OK)
         self.assertEqual(row.artifacts_found, ("artifacts/2026-06-07/summary.json",))
 
-    def test_attempted_run_without_artifact_is_missed_heartbeat(self) -> None:
+    def test_attempted_run_without_artifact_is_reported(self) -> None:
         state = self.workspace / "state" / "nightly-import.json"
         state.parent.mkdir(parents=True)
         state.write_text(
@@ -123,4 +123,3 @@ class CoreTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
