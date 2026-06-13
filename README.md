@@ -8,6 +8,13 @@
 
 It is built around a simple rule: a scheduler timestamp is not proof of success. A job is healthy only when its expected artifacts exist.
 
+## At a Glance
+
+- **Use it for:** cron jobs, GitHub Actions schedules, local agents, release scripts, exports, and report generators that promise to write files.
+- **It checks:** TOML job rules, local artifact paths, optional runner state JSON, and optional failure logs.
+- **It outputs:** terminal verdicts, JSON, Markdown reports, and CI-friendly exit codes.
+- **It does not need:** credentials, a hosted service, network access, or a monitoring account.
+
 ## The Problem
 
 Many automations have two different truths:
@@ -43,12 +50,31 @@ verdict:           RUN_ATTEMPTED_ARTIFACT_MISSING
 
 That distinction is useful when a maintainer needs to know whether to trust an automation, rerun it, or investigate the runner itself.
 
+## Try It in 3 Minutes
+
+From a repository checkout:
+
+```bash
+git clone https://github.com/shinya-dev-jp/artifact-watchdog.git
+cd artifact-watchdog
+python -m pip install .
+scripts/quickstart_smoke.sh
+```
+
+The smoke test installs the CLI as a user would, copies the demo fixture into a temporary workspace, checks the expected verdicts, and verifies that `--fail-on any` exits non-zero for unhealthy jobs.
+
+Expected final line:
+
+```text
+quickstart smoke ok
+```
+
 ## Demo
 
 The demo fixture contains four jobs: one healthy, one attempted-without-artifact, one with a matching runner failure log, and one with a schedule drift.
 
 ```bash
-PYTHONPATH=src python -m artifact_watchdog.cli \
+artifact-watchdog \
   --config examples/demo-workspace/watchdog.toml \
   --workspace examples/demo-workspace \
   --date 2026-06-07 \
@@ -58,10 +84,10 @@ PYTHONPATH=src python -m artifact_watchdog.cli \
 Expected output:
 
 ```text
-docs-build	OK	artifact=FOUND
-nightly-import	RUN_ATTEMPTED_ARTIFACT_MISSING	artifact=MISSING
-release-notes	RUNNER_FAIL_LOG_FOUND	artifact=MISSING
-metrics-rollup	TIME_DRIFT_CHECK	artifact=MISSING
+docs-build	OK	artifact=FOUND	last=2026-06-07T02:01:00+00:00	next=2026-06-08T02:00:00+00:00	drift=none
+nightly-import	RUN_ATTEMPTED_ARTIFACT_MISSING	artifact=MISSING	last=2026-06-07T03:01:00+00:00	next=2026-06-08T03:00:00+00:00	drift=none
+release-notes	RUNNER_FAIL_LOG_FOUND	artifact=MISSING	last=2026-06-07T04:01:00+00:00	next=2026-06-08T04:00:00+00:00	drift=none
+metrics-rollup	TIME_DRIFT_CHECK	artifact=MISSING	last=2026-06-06T05:01:00+00:00	next=2026-06-08T14:00:00+00:00	drift=expected=05:00, next_run_at=14:00
 ```
 
 The demo workspace lives in [`examples/demo-workspace`](examples/demo-workspace/README.md).
@@ -70,15 +96,31 @@ The demo workspace lives in [`examples/demo-workspace`](examples/demo-workspace/
 
 Requires Python 3.11 or newer.
 
+From a checkout:
+
+```bash
+python -m pip install .
+```
+
+For editable local development:
+
 ```bash
 python -m pip install -e .
 ```
 
 ## Quick Start
 
+Start from the sample config, then edit the job ids, schedules, artifact paths, state files, and failure patterns for your own workspace.
+
+```bash
+cp examples/artifact-watchdog.toml artifact-watchdog.toml
+```
+
+Run a check from the workspace that contains the expected artifacts:
+
 ```bash
 artifact-watchdog \
-  --config examples/artifact-watchdog.toml \
+  --config artifact-watchdog.toml \
   --workspace . \
   --date 2026-06-07 \
   --markdown reports/2026-06-07.md
@@ -87,20 +129,20 @@ artifact-watchdog \
 JSON output:
 
 ```bash
-artifact-watchdog --config examples/artifact-watchdog.toml --workspace . --json
+artifact-watchdog --config artifact-watchdog.toml --workspace . --json
 ```
 
 Fail a CI step when any job is not `OK`:
 
 ```bash
-artifact-watchdog --config examples/artifact-watchdog.toml --workspace . --fail-on any
+artifact-watchdog --config artifact-watchdog.toml --workspace . --fail-on any
 ```
 
 You can also fail only on specific verdicts:
 
 ```bash
 artifact-watchdog \
-  --config examples/artifact-watchdog.toml \
+  --config artifact-watchdog.toml \
   --workspace . \
   --fail-on RUNNER_FAIL_LOG_FOUND,RUN_ATTEMPTED_ARTIFACT_MISSING
 ```
@@ -190,6 +232,13 @@ Keep private project names, customer data, internal paths, and secrets out of pu
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests
+```
+
+To verify the installed CLI behaves like the README demo from a clean temporary workspace:
+
+```bash
+python -m pip install .
+scripts/quickstart_smoke.sh
 ```
 
 The CI workflow also compiles the source files and runs the demo command on Python 3.11 and 3.12.
