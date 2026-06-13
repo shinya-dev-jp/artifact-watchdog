@@ -1,0 +1,30 @@
+name: Dogfood
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "40 6 * * *"
+
+jobs:
+  dogfood:
+    name: artifact-watchdog monitors its own artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install artifact-watchdog as a user would
+        run: python -m pip install .
+
+      - name: Produce and audit dogfood artifacts
+        run: scripts/dogfood_artifacts.sh

@@ -8,6 +8,8 @@
 - Add Markdown report fixtures to make output changes easier to review.
 - Add GitHub step summary polish for workflows that want both human-readable reports and machine-readable JSON.
 - Keep integration templates covered by smoke tests as the CLI surface changes.
+- Keep dogfood artifacts aligned with README quickstart, template smoke, and unit test coverage.
+- Keep the failure injection lab aligned with every public verdict so detection regressions are caught in CI.
 
 ## Possible Later Work
 

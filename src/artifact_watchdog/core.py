@@ -15,6 +15,7 @@ from .config import JobConfig, WatchdogConfig
 
 class Verdict(StrEnum):
     OK = "OK"
+    STATE_FILE_INVALID = "STATE_FILE_INVALID"
     TIME_DRIFT_CHECK = "TIME_DRIFT_CHECK"
     RUNNER_FAIL_LOG_FOUND = "RUNNER_FAIL_LOG_FOUND"
     RUN_ATTEMPTED_ARTIFACT_MISSING = "RUN_ATTEMPTED_ARTIFACT_MISSING"
@@ -31,6 +32,7 @@ class AuditRow:
     last_run_at: str
     next_run_at: str
     due_at: str
+    state_error: str
     artifact_status: str
     artifacts_found: tuple[str, ...]
     latest_failure: str
@@ -48,6 +50,7 @@ class JobState:
     last_run_at: datetime | None = None
     next_run_at: datetime | None = None
     schedule: str = ""
+    error: str = ""
 
 
 def audit_workspace(
@@ -76,6 +79,7 @@ def audit_workspace(
                 last_run_at=_format_dt(state.last_run_at),
                 next_run_at=_format_dt(state.next_run_at),
                 due_at=_format_dt(due_at),
+                state_error=state.error,
                 artifact_status="FOUND" if artifacts else "MISSING",
                 artifacts_found=tuple(artifacts),
                 latest_failure=failure,
@@ -95,6 +99,8 @@ def _verdict(
     now: datetime,
     drift: str,
 ) -> Verdict:
+    if state.error:
+        return Verdict.STATE_FILE_INVALID
     if drift != "none":
         return Verdict.TIME_DRIFT_CHECK
     if artifacts:
@@ -151,9 +157,12 @@ def _load_state(workspace: Path, job: JobConfig, tz: ZoneInfo | timezone) -> Job
     if not path.exists():
         return JobState()
 
-    data = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return JobState(error=f"{_display_path(workspace, path)}: {exc.__class__.__name__}: {exc}")
     if not isinstance(data, dict):
-        return JobState()
+        return JobState(error=f"{_display_path(workspace, path)}: expected JSON object")
 
     return JobState(
         last_run_at=_parse_datetime(data.get("last_run_at"), tz),
@@ -288,4 +297,3 @@ def _format_dt(value: datetime | None) -> str:
     if not value:
         return ""
     return value.isoformat(timespec="seconds")
-

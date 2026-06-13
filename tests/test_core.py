@@ -109,6 +109,17 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(row.verdict, Verdict.TIME_DRIFT_CHECK)
         self.assertEqual(row.time_drift, "expected=03:00, next_run_at=12:00")
 
+    def test_invalid_state_file_is_reported_as_verdict(self) -> None:
+        state = self.workspace / "state" / "nightly-import.json"
+        state.parent.mkdir(parents=True)
+        state.write_text("{not-json", encoding="utf-8")
+
+        row = self.audit()
+
+        self.assertEqual(row.verdict, Verdict.STATE_FILE_INVALID)
+        self.assertIn("nightly-import.json", row.state_error)
+        self.assertIn("JSONDecodeError", row.state_error)
+
     def test_daily_at_schedule_format(self) -> None:
         config = load_config(write_config(self.workspace, config_body("daily@04:30")))
         rows = audit_workspace(

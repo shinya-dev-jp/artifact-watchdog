@@ -13,6 +13,7 @@ It is built around a simple rule: a scheduler timestamp is not proof of success.
 - **Use it for:** cron jobs, GitHub Actions schedules, local agents, release scripts, exports, and report generators that promise to write files.
 - **It checks:** TOML job rules, local artifact paths, optional runner state JSON, and optional failure logs.
 - **It outputs:** terminal verdicts, JSON, Markdown reports, and CI-friendly exit codes.
+- **It proves:** deterministic failure-injection fixtures for stale artifacts, failed runners, drifted schedules, invalid state, and partial success.
 - **It does not need:** credentials, a hosted service, network access, or a monitoring account.
 
 ## The Problem
@@ -91,6 +92,22 @@ metrics-rollup	TIME_DRIFT_CHECK	artifact=MISSING	last=2026-06-06T05:01:00+00:00	
 ```
 
 The demo workspace lives in [`examples/demo-workspace`](examples/demo-workspace/README.md).
+
+## Failure Injection Lab
+
+The reliability lab generates a temporary workspace with every major verdict class, including stale artifacts, invalid state JSON, and partial success. It then audits the workspace and fails if any observed verdict differs from the expected matrix.
+
+```bash
+PYTHONPATH=src python scripts/failure_lab.py
+```
+
+Expected final line:
+
+```text
+failure lab ok rows=10
+```
+
+Read the matrix in [`docs/FAILURE_LAB.md`](docs/FAILURE_LAB.md).
 
 ## Install
 
@@ -218,6 +235,7 @@ Optional state files are JSON:
 | Verdict | Meaning |
 |---|---|
 | `OK` | At least one expected artifact exists. |
+| `STATE_FILE_INVALID` | The configured state file exists but cannot be parsed as a JSON object. |
 | `TIME_DRIFT_CHECK` | Scheduler state points to a different time than the configured schedule. |
 | `RUNNER_FAIL_LOG_FOUND` | No artifact exists, and a recent matching failure log was found. |
 | `RUN_ATTEMPTED_ARTIFACT_MISSING` | State says the job ran on the target date, but no artifact exists. |
@@ -259,10 +277,23 @@ To verify the integration templates still load and their shell snippets are vali
 scripts/template_pack_smoke.sh
 ```
 
+To run the deterministic failure-injection lab:
+
+```bash
+PYTHONPATH=src python scripts/failure_lab.py
+```
+
+To let `artifact-watchdog` monitor this repository's own maintenance checks:
+
+```bash
+scripts/dogfood_artifacts.sh
+```
+
 The CI workflow also compiles the source files and runs the demo command on Python 3.11 and 3.12.
 
 ## Maintainer Notes
 
+- [Dogfooding](docs/DOGFOODING.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Release checklist](docs/RELEASING.md)
 - [Changelog](CHANGELOG.md)

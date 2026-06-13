@@ -1,0 +1,63 @@
+[watchdog]
+timezone = "UTC"
+grace_minutes = 15
+log_lookback_hours = 24
+
+[[jobs]]
+id = "healthy-report"
+schedule = "daily@02:00"
+artifacts = ["artifacts/{date}/healthy-report.txt"]
+state_file = "state/healthy-report.json"
+
+[[jobs]]
+id = "attempted-no-artifact"
+schedule = "daily@03:00"
+artifacts = ["artifacts/{date}/attempted-no-artifact.txt"]
+state_file = "state/attempted-no-artifact.json"
+
+[[jobs]]
+id = "runner-failure-log"
+schedule = "daily@04:00"
+artifacts = ["artifacts/{date}/runner-failure-log.txt"]
+state_file = "state/runner-failure-log.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Scheduled run failed", "Timed out"]
+
+[[jobs]]
+id = "time-drift"
+schedule = "daily@05:00"
+artifacts = ["artifacts/{date}/time-drift.txt"]
+state_file = "state/time-drift.json"
+
+[[jobs]]
+id = "not-due-yet"
+schedule = "daily@23:00"
+artifacts = ["artifacts/{date}/not-due-yet.txt"]
+
+[[jobs]]
+id = "due-passed-missing"
+schedule = "daily@01:00"
+artifacts = ["artifacts/{date}/due-passed-missing.txt"]
+
+[[jobs]]
+id = "stale-artifact-only"
+schedule = "daily@06:00"
+artifacts = ["artifacts/{date}/stale-artifact-only.txt"]
+
+[[jobs]]
+id = "invalid-state-json"
+schedule = "daily@07:00"
+artifacts = ["artifacts/{date}/invalid-state-json.txt"]
+state_file = "state/invalid-state-json.json"
+
+[[jobs]]
+id = "partial-suite-report"
+schedule = "daily@08:00"
+artifacts = ["artifacts/{date}/partial-suite-report.txt"]
+state_file = "state/partial-suite-report.json"
+
+[[jobs]]
+id = "partial-suite-index"
+schedule = "daily@08:00"
+artifacts = ["artifacts/{date}/partial-suite-index.txt"]
+state_file = "state/partial-suite-index.json"

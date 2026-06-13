@@ -3,8 +3,27 @@ set -eu
 
 SCRIPT_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd)
 REPO_ROOT=${1:-$(CDPATH= cd "$SCRIPT_DIR/.." && pwd)}
-WATCHDOG_BIN=${ARTIFACT_WATCHDOG_BIN:-artifact-watchdog}
 FIXTURE="$REPO_ROOT/examples/demo-workspace"
+
+if [ "${PYTHON:-}" ]; then
+  PYTHON_BIN=$PYTHON
+elif command -v python3.12 >/dev/null 2>&1; then
+  PYTHON_BIN=python3.12
+elif command -v python3.11 >/dev/null 2>&1; then
+  PYTHON_BIN=python3.11
+else
+  PYTHON_BIN=python3
+fi
+
+run_watchdog() {
+  if [ "${ARTIFACT_WATCHDOG_BIN:-}" ]; then
+    "$ARTIFACT_WATCHDOG_BIN" "$@"
+  elif command -v artifact-watchdog >/dev/null 2>&1; then
+    artifact-watchdog "$@"
+  else
+    PYTHONPATH="$REPO_ROOT/src" "$PYTHON_BIN" -m artifact_watchdog.cli "$@"
+  fi
+}
 
 if [ ! -d "$FIXTURE" ]; then
   echo "missing demo fixture: $FIXTURE" >&2
@@ -17,7 +36,7 @@ trap 'rm -rf "$tmpdir"' EXIT INT TERM
 cp -R "$FIXTURE" "$tmpdir/demo-workspace"
 cd "$tmpdir"
 
-"$WATCHDOG_BIN" \
+run_watchdog \
   --config demo-workspace/watchdog.toml \
   --workspace demo-workspace \
   --date 2026-06-07 \
@@ -29,7 +48,7 @@ grep 'nightly-import[[:space:]]RUN_ATTEMPTED_ARTIFACT_MISSING[[:space:]]artifact
 grep 'release-notes[[:space:]]RUNNER_FAIL_LOG_FOUND[[:space:]]artifact=MISSING' output.txt
 grep 'metrics-rollup[[:space:]]TIME_DRIFT_CHECK[[:space:]]artifact=MISSING' output.txt
 
-if "$WATCHDOG_BIN" \
+if run_watchdog \
   --config demo-workspace/watchdog.toml \
   --workspace demo-workspace \
   --date 2026-06-07 \

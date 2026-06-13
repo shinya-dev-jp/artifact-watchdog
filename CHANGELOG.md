@@ -12,6 +12,9 @@ The format is inspired by Keep a Changelog, and this project follows semantic ve
 - GitHub Actions and cron usage examples.
 - Integration template pack for GitHub Actions, cron, systemd timers, local agent reports, and release note generation.
 - Template smoke tests for integration configs and shell snippets.
+- Dogfooding script, config, tests, and workflow so `artifact-watchdog` can monitor its own maintenance artifacts.
+- Failure injection reliability lab for `OK`, missing artifacts, stale artifacts, runner failures, schedule drift, invalid state JSON, and partial success.
+- `STATE_FILE_INVALID` verdict for state files that exist but cannot be parsed as JSON objects.
 - GitHub Actions CI for Python 3.11 and 3.12.
 - Demo workspace covering `OK`, attempted-without-artifact, runner-failure, and time-drift verdicts.
 - Issue templates and pull request checklist.

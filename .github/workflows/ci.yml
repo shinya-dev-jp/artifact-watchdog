@@ -30,6 +30,9 @@ jobs:
       - name: Run unit tests
         run: PYTHONPATH=src python -m unittest discover -s tests
 
+      - name: Run failure injection lab
+        run: PYTHONPATH=src python scripts/failure_lab.py --workspace "$RUNNER_TEMP/failure-lab"
+
       - name: Run demo command
         run: |
           PYTHONPATH=src python -m artifact_watchdog.cli \

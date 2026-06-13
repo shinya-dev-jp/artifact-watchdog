@@ -1,0 +1,31 @@
+[watchdog]
+timezone = "UTC"
+grace_minutes = 30
+log_lookback_hours = 24
+
+[[jobs]]
+id = "unit-tests"
+status = "active"
+schedule = "daily@06:00"
+artifacts = ["reports/{date}/unit-tests.txt"]
+state_file = "state/unit-tests.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Dogfood check failed", "FAILED", "ERROR"]
+
+[[jobs]]
+id = "readme-quickstart-smoke"
+status = "active"
+schedule = "daily@06:10"
+artifacts = ["reports/{date}/quickstart-smoke.txt"]
+state_file = "state/readme-quickstart-smoke.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Dogfood check failed", "expected", "missing"]
+
+[[jobs]]
+id = "integration-template-smoke"
+status = "active"
+schedule = "daily@06:20"
+artifacts = ["reports/{date}/template-pack-smoke.txt"]
+state_file = "state/integration-template-smoke.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Dogfood check failed", "FAILED", "ERROR"]
