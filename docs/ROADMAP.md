@@ -7,6 +7,7 @@
 - Add stricter config validation with clearer error messages.
 - Add Markdown report fixtures to make output changes easier to review.
 - Add GitHub step summary polish for workflows that want both human-readable reports and machine-readable JSON.
+- Keep integration templates covered by smoke tests as the CLI surface changes.
 
 ## Possible Later Work
 

@@ -1,0 +1,25 @@
+[watchdog]
+timezone = "UTC"
+grace_minutes = 30
+log_lookback_hours = 48
+
+[[jobs]]
+id = "release-notes"
+status = "active"
+schedule = "daily@17:00"
+artifacts = [
+  "release-notes/{date_compact}_release-notes.md",
+  "reports/{date}/release-summary.md",
+]
+state_file = "state/release-notes.json"
+log_paths = ["logs/release/*.log"]
+failure_patterns = ["Release note generation failed", "Changelog build failed", "Timed out"]
+
+[[jobs]]
+id = "package-manifest"
+status = "active"
+schedule = "daily@17:15"
+artifacts = ["dist/{date_compact}/manifest.json"]
+state_file = "state/package-manifest.json"
+log_paths = ["logs/release/*.log"]
+failure_patterns = ["Manifest generation failed", "Package build failed"]

@@ -1,0 +1,25 @@
+[watchdog]
+timezone = "UTC"
+grace_minutes = 10
+log_lookback_hours = 24
+
+[[jobs]]
+id = "daily-agent-report"
+status = "active"
+schedule = "daily@06:00"
+artifacts = [
+  "reports/{date}/agent-summary.md",
+  "reports/{date_compact}_agent-summary.md",
+]
+state_file = "state/daily-agent-report.json"
+log_paths = ["logs/agent/*.log"]
+failure_patterns = ["Agent failed", "Task aborted", "Traceback"]
+
+[[jobs]]
+id = "agent-quality-check"
+status = "active"
+schedule = "daily@06:15"
+artifacts = ["reports/{date}/quality-check.json"]
+state_file = "state/agent-quality-check.json"
+log_paths = ["logs/agent/*.log"]
+failure_patterns = ["Quality check failed", "Validation failed"]

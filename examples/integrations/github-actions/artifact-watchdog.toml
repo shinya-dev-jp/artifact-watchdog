@@ -1,0 +1,22 @@
+[watchdog]
+timezone = "UTC"
+grace_minutes = 15
+log_lookback_hours = 24
+
+[[jobs]]
+id = "docs-build"
+status = "active"
+schedule = "daily@04:30"
+artifacts = ["site/{date}/index.html"]
+state_file = "state/docs-build.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Build failed", "exit code"]
+
+[[jobs]]
+id = "nightly-export"
+status = "active"
+schedule = "daily@03:00"
+artifacts = ["artifacts/{date}/export-summary.json"]
+state_file = "state/nightly-export.json"
+log_paths = ["logs/*.log"]
+failure_patterns = ["Export failed", "Timed out"]

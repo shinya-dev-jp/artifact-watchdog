@@ -1,0 +1,22 @@
+[watchdog]
+timezone = "UTC"
+grace_minutes = 20
+log_lookback_hours = 24
+
+[[jobs]]
+id = "daily-backup"
+status = "active"
+schedule = "daily@02:00"
+artifacts = ["backups/{date}/archive.tar.gz"]
+state_file = "state/daily-backup.json"
+log_paths = ["logs/backup/*.log"]
+failure_patterns = ["Backup failed", "No space left", "Permission denied"]
+
+[[jobs]]
+id = "daily-export"
+status = "active"
+schedule = "daily@03:30"
+artifacts = ["exports/{date}/export.csv"]
+state_file = "state/daily-export.json"
+log_paths = ["logs/export/*.log"]
+failure_patterns = ["Export failed", "Timed out"]

@@ -1,0 +1,13 @@
+[watchdog]
+timezone = "UTC"
+grace_minutes = 15
+log_lookback_hours = 24
+
+[[jobs]]
+id = "server-export"
+status = "active"
+schedule = "daily@05:00"
+artifacts = ["exports/{date}/server-export.json"]
+state_file = "state/server-export.json"
+log_paths = ["logs/server-export/*.log"]
+failure_patterns = ["Export failed", "Task failed", "Timed out"]

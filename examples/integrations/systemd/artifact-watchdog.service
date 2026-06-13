@@ -1,0 +1,9 @@
+[Unit]
+Description=Audit scheduled artifacts with artifact-watchdog
+Documentation=https://github.com/shinya-dev-jp/artifact-watchdog
+
+[Service]
+Type=oneshot
+Environment=ARTIFACT_WATCHDOG_WORKSPACE=/srv/example-workspace
+Environment=ARTIFACT_WATCHDOG_CONFIG=/srv/example-workspace/artifact-watchdog.toml
+ExecStart=/bin/sh -lc 'artifact-watchdog --config "$ARTIFACT_WATCHDOG_CONFIG" --workspace "$ARTIFACT_WATCHDOG_WORKSPACE" --date "$(date -u +%%F)" --markdown "$ARTIFACT_WATCHDOG_WORKSPACE/reports/artifact-watchdog-$(date -u +%%F).md" --fail-on any'

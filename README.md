@@ -157,6 +157,18 @@ For a local machine or server cron, adapt [`examples/cron-daily.sh`](examples/cr
 30 6 * * * cd /path/to/workspace && ARTIFACT_WATCHDOG_CONFIG=artifact-watchdog.toml ./examples/cron-daily.sh
 ```
 
+## Integration Templates
+
+Copyable templates are available for common scheduled-artifact workflows:
+
+- GitHub Actions scheduled workflow
+- cron job
+- systemd timer
+- local agent report
+- release note generation
+
+Start with [`docs/INTEGRATION_TEMPLATES.md`](docs/INTEGRATION_TEMPLATES.md), then copy the closest template from [`examples/integrations`](examples/integrations/).
+
 ## Config
 
 Config files use TOML and stay intentionally generic.
@@ -239,6 +251,12 @@ To verify the installed CLI behaves like the README demo from a clean temporary 
 ```bash
 python -m pip install .
 scripts/quickstart_smoke.sh
+```
+
+To verify the integration templates still load and their shell snippets are valid:
+
+```bash
+scripts/template_pack_smoke.sh
 ```
 
 The CI workflow also compiles the source files and runs the demo command on Python 3.11 and 3.12.
