@@ -34,4 +34,9 @@ body:
     attributes:
       label: Version
       placeholder: "artifact-watchdog 0.1.0, Python 3.12"
-
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Scheduler or workflow context
+      description: Is this cron, GitHub Actions, systemd, a local agent, or another file-producing job? Include only sanitized config snippets.
+      render: text

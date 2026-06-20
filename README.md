@@ -58,11 +58,13 @@ From a repository checkout:
 ```bash
 git clone https://github.com/shinya-dev-jp/artifact-watchdog.git
 cd artifact-watchdog
-python -m pip install .
+python3.11 -m pip install .
 scripts/quickstart_smoke.sh
 ```
 
-The smoke test installs the CLI as a user would, copies the demo fixture into a temporary workspace, checks the expected verdicts, and verifies that `--fail-on any` exits non-zero for unhealthy jobs.
+If `python3.11` is not available, install Python 3.11 or newer first. On macOS, `/usr/bin/python3` can still be Python 3.9; use `PYTHON=python3.11 scripts/quickstart_smoke.sh` when you have multiple Python versions installed.
+
+The smoke test uses the installed CLI when available, copies the demo fixture into a temporary workspace, checks the expected verdicts, and verifies that `--fail-on any` exits non-zero for unhealthy jobs.
 
 Expected final line:
 
@@ -116,13 +118,13 @@ Requires Python 3.11 or newer.
 From a checkout:
 
 ```bash
-python -m pip install .
+python3.11 -m pip install .
 ```
 
 For editable local development:
 
 ```bash
-python -m pip install -e .
+python3.11 -m pip install -e .
 ```
 
 ## Quick Start
@@ -173,6 +175,8 @@ For a local machine or server cron, adapt [`examples/cron-daily.sh`](examples/cr
 ```cron
 30 6 * * * cd /path/to/workspace && ARTIFACT_WATCHDOG_CONFIG=artifact-watchdog.toml ./examples/cron-daily.sh
 ```
+
+If your problem is a GitHub Actions schedule that runs late, does not run, or finishes without the artifact you expected, start with [`docs/GITHUB_ACTIONS_ARTIFACT_CHECKS.md`](docs/GITHUB_ACTIONS_ARTIFACT_CHECKS.md).
 
 ## Integration Templates
 
@@ -261,13 +265,13 @@ Keep private project names, customer data, internal paths, and secrets out of pu
 ## Development
 
 ```bash
-PYTHONPATH=src python -m unittest discover -s tests
+PYTHONPATH=src python3.11 -m unittest discover -s tests
 ```
 
 To verify the installed CLI behaves like the README demo from a clean temporary workspace:
 
 ```bash
-python -m pip install .
+python3.11 -m pip install .
 scripts/quickstart_smoke.sh
 ```
 
@@ -280,7 +284,7 @@ scripts/template_pack_smoke.sh
 To run the deterministic failure-injection lab:
 
 ```bash
-PYTHONPATH=src python scripts/failure_lab.py
+PYTHONPATH=src python3.11 scripts/failure_lab.py
 ```
 
 To let `artifact-watchdog` monitor this repository's own maintenance checks:

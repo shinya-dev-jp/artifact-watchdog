@@ -22,4 +22,8 @@ body:
     attributes:
       label: Alternatives
       description: What can users do today without this feature?
-
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence of demand
+      description: Link or describe the sanitized maintainer workflow, CI failure mode, cron problem, or artifact-output gap this would help.

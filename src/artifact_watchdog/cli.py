@@ -5,6 +5,10 @@ from datetime import date as Date
 from datetime import datetime
 from pathlib import Path
 
+from ._compat import enforce_supported_python
+
+enforce_supported_python()
+
 from .config import ConfigError, load_config
 from .core import Verdict, audit_workspace
 from .report import rows_to_json, rows_to_text, write_markdown

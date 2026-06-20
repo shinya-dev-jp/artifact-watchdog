@@ -15,6 +15,22 @@ else
   PYTHON_BIN=python3
 fi
 
+check_python_version() {
+  "$PYTHON_BIN" - <<'PY'
+import sys
+
+if sys.version_info < (3, 11):
+    version = ".".join(str(part) for part in sys.version_info[:3])
+    print(
+        "artifact-watchdog requires Python 3.11 or newer. "
+        f"Selected interpreter is Python {version}. "
+        "Install Python 3.11+ or rerun with PYTHON=python3.11.",
+        file=sys.stderr,
+    )
+    raise SystemExit(2)
+PY
+}
+
 run_watchdog() {
   if [ "${ARTIFACT_WATCHDOG_BIN:-}" ]; then
     "$ARTIFACT_WATCHDOG_BIN" "$@"
@@ -29,6 +45,8 @@ if [ ! -d "$FIXTURE" ]; then
   echo "missing demo fixture: $FIXTURE" >&2
   exit 1
 fi
+
+check_python_version
 
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
